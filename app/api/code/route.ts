@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { CreateChatCompletionRequestMessage } from "openai/resources/index.mjs";
 
-const AZURE_OPENAI_API_KEY = process.env.AZURE_API_KEY || "your_actual_key";
-const AZURE_OPENAI_INSTANCE_NAME = "viresh";  
-const AZURE_OPENAI_MODEL_DEPLOYMENT = "gpt-4o"; 
+const AZURE_OPENAI_API_KEY = process.env.AZURE_API_KEY ;
+const AZURE_OPENAI_INSTANCE_NAME = process.env.AZURE_OPENAI_INSTANCE_NAME;  
+const AZURE_OPENAI_MODEL_DEPLOYMENT = process.env.AZURE_DEPLOYMENT_NAME||""; 
 
 if (!AZURE_OPENAI_API_KEY) {
     throw new Error("The AZURE_OPENAI_API_KEY environment variable is missing or empty.");

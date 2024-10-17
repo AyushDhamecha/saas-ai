@@ -18,6 +18,7 @@ import { useState } from "react";
 import {Empty} from "@/components/empty"
 import { Loader } from "@/components/loader";
 import { cn } from "@/lib/utils";
+import { useProModal } from "@/app/hooks/use-pro-modal";
 
 
 
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils";
 
     const router=useRouter();
     const[video,setVideo]=useState<string>();
+    const proModal=useProModal();
 
     const form=useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema),
@@ -45,7 +47,9 @@ import { cn } from "@/lib/utils";
             form.reset()
         }
         catch(error:any){
-            console.log(error);
+            if(error?.response?.status===403){
+                proModal.onOpen();
+            }
         }
         finally{
             router.refresh();

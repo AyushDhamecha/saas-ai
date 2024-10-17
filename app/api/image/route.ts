@@ -1,7 +1,10 @@
+import { increaseApiLimit ,checkApiLimit} from "@/lib/api-limit";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const IMAGE_GENERATION_API_URL = "http://4.240.106.246:8080/predictions";
+
+
+const IMAGE_GENERATION_API_URL = "http://4.240.106.246:5000/predictions";
 
 export async function POST(req: Request) {
     try {
@@ -41,6 +44,14 @@ export async function POST(req: Request) {
             return new NextResponse("Prompt is required and should be a string.", { status: 400 });
         }
 
+        const freeTrial=await checkApiLimit();
+        
+        if(!freeTrial){
+            return new NextResponse("Free trial has ended. Please upgrade to a paid plan to continue!"
+                ,{status:403}
+            )
+        }
+
         const response = await fetch(IMAGE_GENERATION_API_URL, {
             method: "POST",
             headers: {
@@ -75,6 +86,8 @@ export async function POST(req: Request) {
         });
 
         const data = await response.json();
+
+        await increaseApiLimit();
         // console.log(data);
 
         if (response.ok && data && data.output) {

@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { CreateChatCompletionRequestMessage } from "openai/resources/index.mjs";
 
+import { increaseApiLimit,checkApiLimit } from "@/lib/api-limit";
+
+
 const AZURE_OPENAI_API_KEY = process.env.AZURE_API_KEY ;
 const AZURE_OPENAI_INSTANCE_NAME = process.env.AZURE_OPENAI_INSTANCE_NAME;  
 const AZURE_OPENAI_MODEL_DEPLOYMENT = process.env.AZURE_DEPLOYMENT_NAME||""; 
@@ -36,10 +39,20 @@ export async function POST(req: Request) {
             return new NextResponse("Messages are required and should be an array.", { status: 400 });
         }
 
+        const freeTrial=await checkApiLimit();
+        
+        if(!freeTrial){
+            return new NextResponse("Free trial has ended. Please upgrade to a paid plan to continue!"
+                ,{status:403}
+            )
+        }
+
         const response = await openai.chat.completions.create({
             model: AZURE_OPENAI_MODEL_DEPLOYMENT,
             messages: [instructionMessage, ...messages],
         });
+
+        await increaseApiLimit();
 
         if (response.choices && response.choices[0] && response.choices[0].message) {
             return NextResponse.json(response.choices[0].message);

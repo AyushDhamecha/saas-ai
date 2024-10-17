@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import axios from 'axios';
+import { increaseApiLimit,checkApiLimit } from "@/lib/api-limit";
 
 const NEXT_PUBLIC_DEEPAI_API_KEY = process.env.DEEPAI_API_KEY;
 
@@ -21,6 +22,14 @@ export async function POST(req: Request) {
             return new NextResponse("Prompt is required.", { status: 400 });
         }
 
+        const freeTrial=await checkApiLimit();
+        
+        if(!freeTrial){
+            return new NextResponse("Free trial has ended. Please upgrade to a paid plan to continue!"
+                ,{status:403}
+            )
+        }
+
         const response = await axios.post(
             'https://api.deepai.org/api/some-correct-endpoint', // Replace with the correct endpoint
             { text: prompt }, // Adjust payload as needed
@@ -31,6 +40,8 @@ export async function POST(req: Request) {
                 }
             }
         );
+
+        await increaseApiLimit();
 
         return NextResponse.json(response.data);
     } catch (error: any) {

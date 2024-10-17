@@ -40,7 +40,7 @@ const ImagePage = () => {
       setImages([]);
       const response = await axios.post("/api/image", values);
 
-       console.log("API Response:", response.data.output[0]);
+      console.log("API Response:", response.data.output[0]);
 
       if (response.data && Array.isArray(response.data.output)) {
         const urls = response.data.output.map((base64: string) => `${base64}`);
@@ -173,13 +173,19 @@ const ImagePage = () => {
                 </div>
                 <CardFooter className="p-2">
                   <Button
-                    onClick={() => { window.open(src) }}
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = src;
+                      link.download = "generated-image.png"; // You can change the filename if needed
+                      link.click();
+                    }}
                     variant="secondary"
                     className="w-full"
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
+
                 </CardFooter>
               </Card>
             ))}

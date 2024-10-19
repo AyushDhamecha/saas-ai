@@ -1,3 +1,4 @@
+import { increaseApiLimit,checkApiLimit } from "@/lib/api-limit";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
@@ -32,6 +33,13 @@ export async function POST(req: Request) {
                 num_inference_steps: 50 // Default value
             }
         };
+        const freeTrial=await checkApiLimit();
+        
+        if(!freeTrial){
+            return new NextResponse("Free trial has ended. Please upgrade to a paid plan to continue!"
+                ,{status:403}
+            )
+        }
 
         // Send a POST request to the custom API endpoint
         const response = await fetch("http://4.240.106.246:5000/predictions", {
@@ -42,6 +50,8 @@ export async function POST(req: Request) {
             body: JSON.stringify(payload)
         });
 
+        await increaseApiLimit();
+
         if (!response.ok) {
             const errorResponse = await response.text();
             console.error("[MUSIC_GENERATION_ERROR] Response Error:", errorResponse);
@@ -49,6 +59,7 @@ export async function POST(req: Request) {
         }
 
         const responseData = await response.json();
+
 
         // Log the response for debugging
         console.log("[MUSIC_GENERATION_SUCCESS] Response Data:", responseData);

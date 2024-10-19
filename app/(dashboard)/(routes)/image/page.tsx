@@ -19,6 +19,7 @@ import { Loader } from "@/components/loader";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
+import { useProModal } from "@/app/hooks/use-pro-modal";
 
 const ImagePage = () => {
   const router = useRouter();
@@ -34,13 +35,14 @@ const ImagePage = () => {
   });
 
   const isLoading = form.formState.isSubmitting;
+  const proModal=useProModal();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setImages([]);
       const response = await axios.post("/api/image", values);
 
-       console.log("API Response:", response.data.output[0]);
+      console.log("API Response:", response.data.output[0]);
 
       if (response.data && Array.isArray(response.data.output)) {
         const urls = response.data.output.map((base64: string) => `${base64}`);
@@ -51,7 +53,9 @@ const ImagePage = () => {
 
       form.reset();
     } catch (error: any) {
-      console.log(error);
+      if(error?.response?.status===403){
+        proModal.onOpen();
+    }
     } finally {
       router.refresh();
     }
@@ -173,13 +177,19 @@ const ImagePage = () => {
                 </div>
                 <CardFooter className="p-2">
                   <Button
-                    onClick={() => { window.open(src) }}
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = src;
+                      link.download = "generated-image.png"; // You can change the filename if needed
+                      link.click();
+                    }}
                     variant="secondary"
                     className="w-full"
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
+
                 </CardFooter>
               </Card>
             ))}

@@ -23,6 +23,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
 
 import ReactMarkdown from "react-markdown"
+import { useProModal } from "@/app/hooks/use-pro-modal";
 // import remarkGfm from "remark-gfm"; // For GitHub flavored markdown, like tables
 // import rehypeRaw from "rehype-raw"; 
 
@@ -32,6 +33,7 @@ import ReactMarkdown from "react-markdown"
 
     const router=useRouter();
     const[messages,setMessages]=useState<ChatCompletionRequestMessage[]>([]);
+    const proModal=useProModal();
 
     const form=useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema),
@@ -58,7 +60,9 @@ import ReactMarkdown from "react-markdown"
             form.reset();
         }
         catch(error:any){
-            console.log(error);
+            if(error?.response?.status===403){
+                proModal.onOpen();
+            }
         }
         finally{
             router.refresh();

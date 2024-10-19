@@ -1,3 +1,4 @@
+
 import {Navbar} from "@/components/navbar"
 import Sidebar from "@/components/sidebar"
 import { getApiLimitCount } from "@/lib/api-limit";
@@ -15,8 +16,8 @@ const DashboardLayout = async({
                 apiLimitCount={apiLimitCount}
                 />
             </div>
-            <main className="md:pl-72">
-                <Navbar/>
+            <main className="md:pl-60">
+                <Navbar />
                 {children}
             </main>
         </div>
